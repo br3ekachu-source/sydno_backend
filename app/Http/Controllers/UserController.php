@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -34,16 +36,16 @@ class UserController extends Controller
         ]);
 
         $user = User::find($request->user()->id);
-        $input = $request->post();
+
         if ($request['email'] !== $user->email &&
             $user instanceof MustVerifyEmail) {
-            $this->updateVerifiedUser($user, $input);
+            $this->updateVerifiedUser($user, $request);
         } else {
             if (isset($input['name'])) {
-                $user->name = $input['name'];
+                $user->name = $request['name'];
             }
             if (isset($input['phone_number'])) {
-                $user->phone_number = $input['phone_number'];
+                $user->phone_number = $request['phone_number'];
             }
             $user->save();
         }
@@ -54,19 +56,37 @@ class UserController extends Controller
      *
      * @param  array<string, string>  $input
      */
-    protected function updateVerifiedUser(User $user, array $input): void
+    protected function updateVerifiedUser(User $user, Request $request): void
     {
-        if (isset($input['name'])) {
-            $user->name = $input['name'];
+        if (isset($request['name'])) {
+            $user->name = $request['name'];
         }
-        if (isset($input['phone_number'])) {
-            $user->phone_number = $input['phone_number'];
+        if (isset($request['phone_number'])) {
+            $user->phone_number = $request['phone_number'];
         }
         $user->forceFill([
             'email_verified_at' => null
         ])->save();
 
         $user->sendEmailVerificationNotification();
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'string', 'current_password:web'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        if ($request['password_confirmation'] != $request['password']) {
+            return 'The provided password does not match password confirmation.';
+        }
+
+        $user = User::find($request->user()->id);
+
+        $user->forceFill([
+            'password' => Hash::make($request['password']),
+        ])->save();
     }
 
     public function show($id)

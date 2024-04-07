@@ -12,6 +12,7 @@ use App\Models\Favorite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Session;
 
 class AdvertController extends Controller
 {
@@ -246,8 +247,14 @@ class AdvertController extends Controller
         } else {
             $advert['in_favorites'] = false;
         }
-        if ($request->user() != null && $advert->user->id != $request->user()->id && !$request->user()->advertViews()->where('advert_id', $id)->exists()) {
-            $request->user()->advertViews()->attach($id);
+        if ($request->session()->get('_token') != null && !AdvertView::where('session_token', $request->session()->get('_token'))->exists()) {
+            $advertView = new AdvertView;
+            $advertView->advert_id = $id;
+            $advertView->session_token = $request->session()->get('_token');
+            $advertView->save();
+        }
+        if (!in_array($id ,$request->session()->get('recently_views.adverts') ?? [])) {
+            $request->session()->push('recently_views.adverts', $id);
         }
         return $advert;
     }
@@ -364,9 +371,8 @@ class AdvertController extends Controller
     }
 
     public function getRecentlyViews(Request $request) {
-        $adverts = Advert::whereHas('viewsUsers', function ($query) use ($request) {
-            $query->where('advert_views.user_id', '=', $request->user()->id);
-        })
+        $advert_ids = $request->session()->get('recently_views.adverts') ?? [];
+        $adverts = Advert::whereIn('id', $advert_ids)
         ->with('AdvertLegalInformation', 'AdvertTechnicalInformation', 'user:id,name,avatar')->paginate(12);
         return $adverts;
     }

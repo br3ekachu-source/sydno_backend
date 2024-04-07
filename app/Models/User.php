@@ -10,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Advert;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -57,10 +57,5 @@ class User extends Authenticatable
     public function favorites()
     {
         return $this->belongsToMany(Advert::class, 'favorites', 'user_id', 'advert_id')->withTimeStamps();
-    }
-
-    public function advertViews()
-    {
-        return $this->belongsToMany(Advert::class, 'advert_views', 'user_id', 'advert_id')->withTimeStamps();
     }
 }

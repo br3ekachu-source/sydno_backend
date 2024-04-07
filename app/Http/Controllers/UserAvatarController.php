@@ -7,11 +7,12 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+
 class UserAvatarController extends Controller
 {
     public function update(Request $request)
     {
-        $this->validate($request, ['avatar_image' => 'required|image|mimes:jpeg,png,jpg,svg:max:2048']);
+        $request->validate(['avatar_image' => 'required|image|mimes:jpeg,png,jpg,svg:max:2048']);
         if(!$request->hasFile('avatar_image')){
             return response()->json(['message' => 'avatar field is required']);
         }

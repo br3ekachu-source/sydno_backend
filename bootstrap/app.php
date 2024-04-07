@@ -13,17 +13,18 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \App\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            //\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
         //удалить чтобы вкл
-        // $middleware->validateCsrfTokens(except: [
-        //     '*'
-        // ]);
-        //
+        $middleware->validateCsrfTokens(except: [
+            '*'
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

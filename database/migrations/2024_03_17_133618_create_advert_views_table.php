@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('advert_views', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class);
+            $table->string('session_token', 50);
             $table->foreignIdFor(Advert::class);
             $table->timestamps();
         });

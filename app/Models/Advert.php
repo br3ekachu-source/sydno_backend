@@ -9,6 +9,8 @@ use App\Http\Services\Consts;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Http\Services\Files;
+use Illuminate\Contracts\Session\Session as SessionSession;
+use Illuminate\Support\Facades\Session;
 
 class Advert extends Model
 {
@@ -63,21 +65,12 @@ class Advert extends Model
 
     public function getViewedAttribute()
     {
-        $user = auth()->user();
-        if ($user == null) {
-            return false;
-        }
-        return $this->belongsToMany(Advert::class, 'advert_views', 'advert_id', 'user_id')->where('advert_views.user_id', '=', $user->id)->exists();
+        return in_array($this->id , Session::get('recently_views.adverts') ?? []);
     }
 
     public function getViewsAttribute()
     {
-        return $this->belongsToMany(Advert::class, 'advert_views', 'advert_id', 'user_id')->count();
-    }
-
-    public function viewsUsers()
-    {
-        return $this->belongsToMany(Advert::class, 'advert_views', 'advert_id', 'user_id')->withTimeStamps();
+        return AdvertView::where('advert_id', $this->id)->count();
     }
 
     public function advertLegalInformation(): HasOne
