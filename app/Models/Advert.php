@@ -22,7 +22,8 @@ class Advert extends Model
     protected $appends = [
         'favorites_count',
         'views',
-        'viewed'
+        'viewed',
+        'can_edit'
     ];
 
     public function getImagesAttribute($value)
@@ -66,6 +67,11 @@ class Advert extends Model
     public function getViewedAttribute()
     {
         return in_array($this->id , Session::get('recently_views.adverts') ?? []);
+    }
+
+    public function getCanEditAttribute()
+    {
+        return $this->user_id == auth()->id();
     }
 
     public function getViewsAttribute()
