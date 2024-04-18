@@ -285,9 +285,10 @@ class AdvertController extends Controller
         }
 
         $response = $advert->toArray();
+        //return $advert->fracht_type;
 
-        $advert->AdvertLegalInformation == null ?: $response['advert']['fracht_price_type'] = $advert->AdvertLegalInformation->getRawOriginal('fracht_price_type');
-        $advert->AdvertLegalInformation == null ?: $response['advert']['fracht_type'] = $advert->AdvertLegalInformation->getRawOriginal('fracht_type');
+        $advert->fracht_price_type == null ?: $response['fracht_price_type'] = $advert->getRawOriginal('fracht_price_type');
+        $advert->fracht_type == null ?: $response['fracht_type'] = $advert->getRawOriginal('fracht_type');
         $advert->AdvertLegalInformation == null ?: $response['advert_legal_information']['exploitation_type'] = $advert->AdvertLegalInformation->getRawOriginal('exploitation_type');
         $advert->AdvertLegalInformation == null ?: $response['advert_legal_information']['type'] = $advert->AdvertLegalInformation->getRawOriginal('type');
         $advert->AdvertLegalInformation == null ?: $response['advert_legal_information']['vessel_status'] = $advert->AdvertLegalInformation->getRawOriginal('vessel_status');
@@ -373,7 +374,7 @@ class AdvertController extends Controller
     public function getRecentlyViews(Request $request) {
         $advert_ids = $request->session()->get('recently_views.adverts') ?? [];
         $adverts = Advert::whereIn('id', $advert_ids)
-        ->with('AdvertLegalInformation', 'AdvertTechnicalInformation', 'user:id,name,avatar')->paginate(12);
+        ->with('AdvertLegalInformation', 'AdvertTechnicalInformation', 'user:id,name,avatar')->paginate(4);
         return $adverts;
     }
 
