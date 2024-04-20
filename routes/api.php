@@ -38,7 +38,6 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
 
 Route::get('adverts/recentlyviews', [AdvertController::class, 'getRecentlyViews']);
-Route::get('adverts/{id}', [AdvertController::class, 'show']);
 Route::get('adverts/{id}/metadata', [AdvertController::class, 'metadata']);//для вкладки
 Route::get('/useradverts/{id}', [AdvertController::class, 'getUserAdverts']);
 Route::get('/otheruseradverts', [AdvertController::class, 'getOtherUserAdverts']);
@@ -67,6 +66,8 @@ Route::middleware('auth:sanctum'/*, 'verified'*/)->group(function () {
     Route::get('/user/avatar', [UserAvatarController::class, 'get']);
     Route::delete('/user/avatar', [UserAvatarController::class, 'delete']);
 });
+
+Route::get('adverts/{id}', [AdvertController::class, 'show']);
 
 Route::get('/user/{id}', [UserController::class, 'show']);
 Route::get('selector', [ConstController::class, 'getSelectors']);
