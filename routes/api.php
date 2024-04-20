@@ -26,10 +26,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
 
-Route::get('/verify-email/{id}/{hash}', function(Request $request){
-    return $request::url();
-});
-
 Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
                 ->middleware(['auth', 'signed', 'throttle:6,1'])
                 ->name('verification.verify');
