@@ -25,10 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             '*'
         ]);
-        $middleware->trustProxies(at: [
-            '192.168.1.1',
-            '192.168.1.2',
-        ]);
+        $middleware->trustProxies('*');
         $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR |
             Request::HEADER_X_FORWARDED_HOST |
             Request::HEADER_X_FORWARDED_PORT |
