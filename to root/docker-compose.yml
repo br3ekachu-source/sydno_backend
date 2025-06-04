@@ -1,0 +1,90 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+      - /var/www/vendor  # Избегаем перезаписи vendor в контейнере
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - XDEBUG_MODE=develop,debug
+      - XDEBUG_CONFIG="client_host=host.docker.internal"
+      - XDEBUG_CLIENT_PORT=9003
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Для доступа к хосту из контейнера
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: unless-stopped
+    env_file:
+      - .env  # Используем тот же .env файл
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+
+  webserver:
+    image: nginx:alpine
+    container_name: nginx_server
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: next_app
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    env_file:
+      - .env  # Для доступа к NEXT_PUBLIC_API_URL
+    ports:
+      - "3000:3000"
+    networks:
+      - app_network
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP порт (для отправки писем)
+      - "8025:8025"  # Web-интерфейс
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
